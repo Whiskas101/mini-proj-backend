@@ -1,6 +1,7 @@
 
 const mysql = require('mysql2');
 
+
 // I HAVE YET TO SET UP ENV VARIABLES. THIS IS JUST ALPHA CODE. NOT SECURE. DO NOT USE REAL/IMPORTANT WORDS.
 
 const DB_NAME = "user_data";
@@ -24,48 +25,31 @@ const Pool = pool.promise();
 
 
 async function SelectAllFrom(table) {
-    let connection;
-    try {
-        connection = await Pool.getConnection();
-        const QUERY = `SELECT * FROM ${table}`;
-        const [dataArray, _] = await connection.query(QUERY);
+    
+    const QUERY = `SELECT * FROM ${table}`;
+    return await rawQuery(QUERY);
 
-        return dataArray;
-
-    } catch (error) {
-        throw error;
-    } finally {
-        if (connection) {
-            connection.release();
-        }
-    }
 }
 
-
-async function Select(Table, Id) {
-
+const rawQuery = async (query) => {
     let connection;
     try {
         connection = await Pool.getConnection();
-        const QUERY = `SELECT * FROM ${Table} where id=?`;
-        const SQL_QUERY = mysql.format(QUERY, [Id]);
+        console.log("Gained Connection to Database")
+        return await connection.query(query);
+    }catch(err){
+        console.log("Could not connect to Database")
+        throw err;
 
-        const output = connection.query(SQL_QUERY);
-        return output;
-
-
-    } catch (error) {
-        throw error;
-    } finally {
+    }finally{
         if(connection){
             connection.release();
+            console.log('Released Connection')
         }
     }
 
 }
 
-
-
 //functions that are meant to be used out of this file
-module.exports = [pool.promise(), SelectAllFrom, Select];
+module.exports = [pool.promise(), SelectAllFrom, rawQuery];
 
