@@ -30,4 +30,13 @@ const getRecentExpenses = async(req, res)=>{
     res.send(result);
 }
 
-module.exports = {homePage, getExpenses, getRecentExpenses};
+const getRecentExpensesByDay = async(req, res)=>{
+    const range = req.body.range;
+    const userid = req.body.userid;
+
+    const result = await UserModel.getExpensesByDay(range, userid);
+
+    res.send(result);
+}
+
+module.exports = {homePage, getExpenses, getRecentExpenses, getRecentExpensesByDay};

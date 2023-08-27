@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 
 
 class UserModel {
-    //new_table is actually the user table, I just havent gone around to creating an actually decent database schema yet.
+    // new_table is actually the user table, I just haven't gone around to creating an actually decent database schema yet.
     // Each database table along with its schema is stored here temporarily in a JSON object format.
 
     //static EXPENSE_TABLE = 'expenses';
@@ -97,14 +97,11 @@ class UserModel {
 
         // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
         const RECENT_EXPENSES_QUERY =
-                `SELECT SUM(amount), ${this.EXPENSE_TABLE.DATE} FROM DATE(${this.EXPENSE_TABLE.NAME}) dateOnly where ${this.EXPENSE_TABLE.USER_ID}= ? and ${this.EXPENSE_TABLE.DATE} >= ? GROUP BY dateOnly`;
+                `SELECT SUM(${this.EXPENSE_TABLE.AMOUNT}), DATE(${this.EXPENSE_TABLE.DATE}) FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.USER_ID}= ? AND ${this.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${this.EXPENSE_TABLE.DATE})`;
         const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
 
-
-
         if(exists){
-            
-            const result = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
+            const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
             return result;
         }else{
             return `User ID = ${user_id} doesn't exist`;
@@ -144,6 +141,34 @@ class UserModel {
                 return "Incorrect Password";
             }
         }
+    }
+
+    //Adds an expense to the expenses table
+    static async addExpense(amount, desc, user_id){
+        console.log(`Attempting to add an expense for user id : ${user_id} of amount ${amount} desc: ${desc}`)
+        const exists = await Exists(this.USER_TABLE.NAME, this.USER_TABLE.USER_ID, user_id);
+        const date = new Date()
+        const current_date = date.toISOString().slice(0, 19).replace("T", " ");
+        const data_to_insert = {
+            [this.EXPENSE_TABLE.USER_ID]        :   user_id,
+            [this.EXPENSE_TABLE.AMOUNT]         :   amount,
+            [this.EXPENSE_TABLE.DESCRIPTION]    :   desc,
+            [this.EXPENSE_TABLE.DATE]           :   current_date
+        }
+        
+        if(exists){
+            const INSERT_QUERY = `INSERT INTO ${this.EXPENSE_TABLE.NAME} SET ?`
+            const SQL_INSERT_QUERY = mysql.format(INSERT_QUERY, [data_to_insert]);
+            
+            const [result, _] = await rawQuery(SQL_INSERT_QUERY);
+            if(result.affectedRows > 0){
+                console.log("Inserted Successfully.");
+            }
+            return result;
+        }else{
+            return "No such user exists";
+        }
+
     }
 }
 

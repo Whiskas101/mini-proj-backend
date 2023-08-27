@@ -2,7 +2,7 @@
 const mysql = require('mysql2');
 const UserModel = require('../helpers/UserModel.js');
 
-// THESE FUNCTIONS CURRENTLY SEND A RESPONSE. THEY ARE NOT SUPPOSED TO SEND ENTIRE OBJECTS AS RESPONSE WHEN DEPLOYED.
+// THESE FUNCTIONS CURRENTLY SEND THE RESULT AS A RESPONSE.
 // MODIFY ACCORDING TO YOUR NEEDS
 const registerUser = async (req, res) => {
 
@@ -46,8 +46,17 @@ const deleteUser = async(req, res) =>{
     res.send(result);
 }
 
+const addExpense = async(req, res) =>{
+    const userid = req.body.userid;
+    const desc = req.body.desc;
+    const amount = req.body.amount;
 
-module.exports = { registerUser, loginUser, showAllUsers, deleteUser };
+    const result = await UserModel.addExpense(amount, desc, userid);
+    res.send(result);
+}
+
+
+module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense };
 
 
 

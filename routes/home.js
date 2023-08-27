@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { homePage, getExpenses, getRecentExpenses } = require('../controllers/home');
+const { homePage, getExpenses, getRecentExpenses, getRecentExpensesByDay } = require('../controllers/home');
 
 
 
@@ -12,7 +12,9 @@ router.route('/user/:userid')
 
 router.route('/expenses/recent')
     .post(getRecentExpenses);
-    
+
+router.route('/expenses/by/days')
+    .post(getRecentExpensesByDay);
 
 module.exports = router;
 
