@@ -1,6 +1,5 @@
 const Express = require('express');
 const cors = require('cors');
-const [Pool] = require('./helpers/SQLHelper');
 const app = Express();
 
 const PORT = 8000;
@@ -12,9 +11,6 @@ const userRoute = require('./routes/user')
 
 app.use(cors());
 app.use(Express.json());
-
-
-
 
 app.listen(PORT, () => {
     console.log(`Serving on port : ${PORT}`);

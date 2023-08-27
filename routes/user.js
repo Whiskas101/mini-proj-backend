@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 
-const { registerUser, loginUser, showAllUsers } = require('../controllers/user')
+const { registerUser, loginUser, showAllUsers, deleteUser } = require('../controllers/user')
 
 
 
@@ -14,7 +14,8 @@ router.route('/register')
 router.route("/login")
     .post(loginUser);
 
-
+router.route("/delete/")
+    .post(deleteUser);
 
 
 module.exports = router;

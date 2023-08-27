@@ -2,7 +2,8 @@
 const mysql = require('mysql2');
 const UserModel = require('../helpers/UserModel.js');
 
-
+// THESE FUNCTIONS CURRENTLY SEND A RESPONSE. THEY ARE NOT SUPPOSED TO SEND ENTIRE OBJECTS AS RESPONSE WHEN DEPLOYED.
+// MODIFY ACCORDING TO YOUR NEEDS
 const registerUser = async (req, res) => {
 
     // const data = await UserModel.getUserList("new_table");
@@ -15,7 +16,6 @@ const registerUser = async (req, res) => {
 
     //Says internal server error if user already exists, says OK if user is new, can change whenever if need arises
     res.sendStatus(result);
-
 }
 
 const loginUser = async (req, res) => {
@@ -34,16 +34,20 @@ const loginUser = async (req, res) => {
 
 }
 
-
-
 const showAllUsers = async (req, res) => {
     const data = await UserModel.getUserList("new_table");
     res.send(data);
 }
 
+const deleteUser = async(req, res) =>{
+    const userid = req.body.userid;
+    
+    const result = await UserModel.removeUser(userid);
+    res.send(result);
+}
 
 
-module.exports = { registerUser, loginUser, showAllUsers };
+module.exports = { registerUser, loginUser, showAllUsers, deleteUser };
 
 
 
