@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 
-const { registerUser, loginUser, showAllUsers, deleteUser, addExpense } = require('../controllers/user')
+const { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense } = require('../controllers/user')
 
 
 
@@ -19,6 +19,9 @@ router.route("/delete/")
 
 router.route("/add/expense")
     .post(addExpense);
+
+router.route("/remove/expense")
+    .post(deleteExpense);
 
 
 module.exports = router;

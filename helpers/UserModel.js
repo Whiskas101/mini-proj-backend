@@ -1,9 +1,9 @@
+
 const [db, SelectAllFrom, rawQuery, Exists, Delete] = require('../helpers/SQLHelper');
 const mysql = require('mysql2');
 
 
 class UserModel {
-    // new_table is actually the user table, I just haven't gone around to creating an actually decent database schema yet.
     // Each database table along with its schema is stored here temporarily in a JSON object format.
 
     //static EXPENSE_TABLE = 'expenses';
@@ -23,7 +23,6 @@ class UserModel {
         USERNAME: 'username',
         PASSWORD: 'password'
     };
-    //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     static async getUserList(TABLE) {
         console.log(`Calling Database for a list of ALL users in TABLE : ${TABLE}`);
@@ -97,7 +96,7 @@ class UserModel {
 
         // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
         const RECENT_EXPENSES_QUERY =
-                `SELECT SUM(${this.EXPENSE_TABLE.AMOUNT}), DATE(${this.EXPENSE_TABLE.DATE}) FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.USER_ID}= ? AND ${this.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${this.EXPENSE_TABLE.DATE})`;
+                `SELECT SUM(${this.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${this.EXPENSE_TABLE.DATE}) AS date FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.USER_ID}= ? AND ${this.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${this.EXPENSE_TABLE.DATE})`;
         const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
 
         if(exists){
@@ -122,7 +121,7 @@ class UserModel {
         }
     }
 
-    //Returns a particular user id if it exists, otherwise returns -1;
+    //Returns a particular user id if it exists, otherwise returns "Incorrect Password";
     static async attemptLogin(Username, Password) {
         //check if the user exists or not (Cannot login without creating an account first 💀)
         console.log(`Task : Attempting login for user : ${Username}`);
@@ -169,6 +168,22 @@ class UserModel {
             return "No such user exists";
         }
 
+    }
+
+    //Returns a mysql result object (IN JSON FORMAT), after deleting a row from the expenses table
+    static async removeExpense(expense_id){
+        console.log(`Attempting to delete ${expense_id} from ${this.EXPENSE_TABLE.NAME}`);
+        const DELETE_QUERY = `DELETE FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.EXPENSE_ID}=?`;
+        const SQL_DELETE_QUERY = mysql.format(DELETE_QUERY, [expense_id]);
+
+        const [result, _] = await rawQuery(SQL_DELETE_QUERY);
+        if(result.affectedRows > 0){
+            console.log(`Deleted ${result.affectedRows} rows.`);
+            return result;
+        }else{
+            console.log(`Expense ID : ${expense_id} didnt exist`);
+            return result;
+        }
     }
 }
 

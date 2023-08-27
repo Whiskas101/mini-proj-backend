@@ -55,8 +55,15 @@ const addExpense = async(req, res) =>{
     res.send(result);
 }
 
+const deleteExpense = async(req, res) => {
+    const expense_id = req.body.expenseid;
 
-module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense };
+    const result = await UserModel.removeExpense(expense_id);
+    res.send(result);
+}
+
+
+module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense };
 
 
 

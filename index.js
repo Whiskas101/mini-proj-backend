@@ -7,8 +7,6 @@ const PORT = 8000;
 const homeRoute = require('./routes/home')
 const userRoute = require('./routes/user')
 
-
-
 app.use(cors());
 app.use(Express.json());
 
