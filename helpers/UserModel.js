@@ -135,7 +135,7 @@ class UserModel {
             //Accessing result[0] because the result of the query comes as an array, and we need to access the first (and should be only) element
             const STORED_PASSWORD = result[0].password;
             if(STORED_PASSWORD == Password){
-                return result[0].id;
+                return result[0];
             }else{
                 return "Incorrect Password";
             }

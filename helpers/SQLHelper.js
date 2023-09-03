@@ -86,3 +86,4 @@ const rawQuery = async (query) => {
 //functions that are meant to be used out of this file
 module.exports = [pool.promise(), SelectAllFrom, rawQuery, Exists, Delete];
 
+ 

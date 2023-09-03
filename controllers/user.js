@@ -22,14 +22,14 @@ const loginUser = async (req, res) => {
     const Username = req.body.username;
     const Password = req.body.password;
 
-    const user_id = await UserModel.attemptLogin(Username, Password);
+    const user = await UserModel.attemptLogin(Username, Password);
 
-    if (user_id == -1) {
-        res.sendStatus(500);
-        return null;
+    if (user == -1) {
+        res.send({user: "-1"});
+        
     } else {
-        res.sendStatus(200);
-        return user_id;
+        res.send({user: user});
+        
     }
 
 }
