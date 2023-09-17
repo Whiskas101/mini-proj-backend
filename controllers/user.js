@@ -1,5 +1,4 @@
 
-const mysql = require('mysql2');
 const UserModel = require('../helpers/UserModel.js');
 
 // THESE FUNCTIONS CURRENTLY SEND THE RESULT AS A RESPONSE.
@@ -50,8 +49,9 @@ const addExpense = async(req, res) =>{
     const userid = req.body.userid;
     const desc = req.body.desc;
     const amount = req.body.amount;
+    const category = req.body.category;
 
-    const result = await UserModel.addExpense(amount, desc, userid);
+    const result = await UserModel.addExpense(amount, category, desc, userid);
     res.send(result);
 }
 

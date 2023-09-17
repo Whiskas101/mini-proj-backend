@@ -13,6 +13,7 @@ class UserModel {
         EXPENSE_ID: 'expense_id',
         AMOUNT: 'amount',
         DESCRIPTION: 'desc',
+        CATEGORY: 'category',
         DATE: 'date'
     };
 
@@ -21,7 +22,7 @@ class UserModel {
         NAME: 'new_table',
         USER_ID: 'id',
         USERNAME: 'username',
-        PASSWORD: 'password'
+        PASSWORD: 'password',
     };
 
     static async getUserList(TABLE) {
@@ -30,8 +31,7 @@ class UserModel {
         return output;
     }
 
-    //PASSWORD MUST BE HASHED. I HAVE NOT DONE IT YET FOR SAKE FOR TESTING AND DEBUGGING.
-    // FINAL VERSION MUST HAVE HASHED PASSWORDS
+    //PASSWORD MUST BE HASHED. I HAVE NOT DONE IT YET FOR SAKE FOR TESTING QUICK
     static async addUser(Username, Password) {
         console.log(`Attempting to add ${Username} to database`);
 
@@ -53,7 +53,7 @@ class UserModel {
         }
     }
 
-    //Removes user from a database returns a boolean (not yet implemented)
+    //Removes user from a database returns a boolean
     static async removeUser(user_id) {
         console.log(`Attempting to remove user id : ${user_id}`);
         return await Delete(this.USER_TABLE.NAME, this.USER_TABLE.USER_ID, user_id);
@@ -143,8 +143,8 @@ class UserModel {
     }
 
     //Adds an expense to the expenses table
-    static async addExpense(amount, desc, user_id){
-        console.log(`Attempting to add an expense for user id : ${user_id} of amount ${amount} desc: ${desc}`)
+    static async addExpense(amount, category, desc, user_id){
+        console.log(`Attempting to add an expense for user id : ${user_id} of amount ${amount} desc: ${desc} category: ${category}`)
         const exists = await Exists(this.USER_TABLE.NAME, this.USER_TABLE.USER_ID, user_id);
         const date = new Date()
         const current_date = date.toISOString().slice(0, 19).replace("T", " ");
@@ -152,7 +152,8 @@ class UserModel {
             [this.EXPENSE_TABLE.USER_ID]        :   user_id,
             [this.EXPENSE_TABLE.AMOUNT]         :   amount,
             [this.EXPENSE_TABLE.DESCRIPTION]    :   desc,
-            [this.EXPENSE_TABLE.DATE]           :   current_date
+            [this.EXPENSE_TABLE.DATE]           :   current_date,
+            [this.EXPENSE_TABLE.CATEGORY]       :   category
         }
         
         if(exists){
