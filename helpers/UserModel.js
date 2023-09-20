@@ -23,6 +23,7 @@ class UserModel {
         USER_ID: 'id',
         USERNAME: 'username',
         PASSWORD: 'password',
+        BUDGET: 'budget'
     };
 
     static async getUserList(TABLE) {
@@ -36,27 +37,27 @@ class UserModel {
         console.log(`Attempting to add ${Username} to database`);
 
         //Checking if the user ALREADY exists in the database
-        const CHECK_QUERY = `SELECT * FROM ${this.USER_TABLE.NAME} where ${this.USER_TABLE.USERNAME} = ?`;
+        const CHECK_QUERY = `SELECT * FROM ${UserModel.USER_TABLE.NAME} where ${UserModel.USER_TABLE.USERNAME} = ?`;
         const SQL_CHECK_QUERY = mysql.format(CHECK_QUERY, [Username]);
 
         const [result, _] = await rawQuery(SQL_CHECK_QUERY);
         if (result.length != 0) {
             console.log("User Already Exists!")
-            return 500;
+            return result;
 
         } else {
             //if user doesnt exist, then we can excute the following code
-            const QUERY = `INSERT INTO ${this.USER_TABLE.NAME} VALUES (null, ?, ?)`;
+            const QUERY = `INSERT INTO ${UserModel.USER_TABLE.NAME} VALUES (null, ?, ?, 0)`;
             const SQL_QUERY = mysql.format(QUERY, [Username, Password]);
             const [output, _] = await rawQuery(SQL_QUERY);
-            return 200;
+            return output;
         }
     }
 
     //Removes user from a database returns a boolean
     static async removeUser(user_id) {
         console.log(`Attempting to remove user id : ${user_id}`);
-        return await Delete(this.USER_TABLE.NAME, this.USER_TABLE.USER_ID, user_id);
+        return await Delete(UserModel.USER_TABLE.NAME, UserModel.USER_TABLE.USER_ID, user_id);
     }
 
     // Returns a range of Expenses of past X days
@@ -66,29 +67,29 @@ class UserModel {
         month_ago.setDate(month_ago.getDate() - range);
         const date_month_ago = month_ago.toISOString().slice(0, 19).replace("T", " ");
 
-        const result = await Exists(this.EXPENSE_TABLE.NAME, this.EXPENSE_TABLE.USER_ID, user_id);
+        const result = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
 
-        //only proceed if there are expenses for this user
+        //only proceed if there are expenses for UserModel user
         if (result != false) {
             const RECENT_EXPENSES_QUERY =
-                `SELECT * FROM ${this.EXPENSE_TABLE.NAME} where ${this.EXPENSE_TABLE.USER_ID}= ? and ${this.EXPENSE_TABLE.DATE} >= ?`;
+                `SELECT * FROM ${UserModel.EXPENSE_TABLE.NAME} where ${UserModel.EXPENSE_TABLE.USER_ID}= ? and ${UserModel.EXPENSE_TABLE.DATE} >= ?`;
             const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago])
             const [output, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
 
             if (output.length == 0) {
-                return "No Expenses in the specified time range";
+                return ["No Expenses in the specified time range"];
             }
             return output;
 
         } else {
-            return "No expenses for this user, ever.";
+            return ["No expenses for UserModel user, ever."];
         }
     }
 
     //Returns the sum of expenses made by a user, per day, for X number of past days.
     static async getExpensesByDay(range, user_id){
         console.log(`Attempting to get past ${range} days, grouped by each day`);
-        const exists = await Exists(this.EXPENSE_TABLE.NAME, this.EXPENSE_TABLE.USER_ID, user_id);
+        const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
         
         const month_ago = new Date();
         month_ago.setDate(month_ago.getDate() - range);
@@ -96,7 +97,7 @@ class UserModel {
 
         // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
         const RECENT_EXPENSES_QUERY =
-                `SELECT SUM(${this.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${this.EXPENSE_TABLE.DATE}) AS date FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.USER_ID}= ? AND ${this.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${this.EXPENSE_TABLE.DATE})`;
+                `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${UserModel.EXPENSE_TABLE.DATE}) AS date FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${UserModel.EXPENSE_TABLE.DATE})`;
         const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
 
         if(exists){
@@ -111,7 +112,7 @@ class UserModel {
     static async getAllExpenses(UserId) {
         console.log(`Fetching list of all expenses made by user id : ${UserId}`);
 
-        const result = await Exists(this.EXPENSE_TABLE.NAME, this.EXPENSE_TABLE.USER_ID, UserId);
+        const result = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, UserId);
 
         if (result) {
             return result;
@@ -125,7 +126,7 @@ class UserModel {
     static async attemptLogin(Username, Password) {
         //check if the user exists or not (Cannot login without creating an account first 💀)
         console.log(`Task : Attempting login for user : ${Username}`);
-        const result = await Exists(this.USER_TABLE.NAME, this.USER_TABLE.USERNAME, Username);
+        const result = await Exists(UserModel.USER_TABLE.NAME, UserModel.USER_TABLE.USERNAME, Username);
 
         if (result == false) {
             console.log(`No user with username : ${Username}`);
@@ -145,19 +146,19 @@ class UserModel {
     //Adds an expense to the expenses table
     static async addExpense(amount, category, desc, user_id){
         console.log(`Attempting to add an expense for user id : ${user_id} of amount ${amount} desc: ${desc} category: ${category}`)
-        const exists = await Exists(this.USER_TABLE.NAME, this.USER_TABLE.USER_ID, user_id);
+        const exists = await Exists(UserModel.USER_TABLE.NAME, UserModel.USER_TABLE.USER_ID, user_id);
         const date = new Date()
         const current_date = date.toISOString().slice(0, 19).replace("T", " ");
         const data_to_insert = {
-            [this.EXPENSE_TABLE.USER_ID]        :   user_id,
-            [this.EXPENSE_TABLE.AMOUNT]         :   amount,
-            [this.EXPENSE_TABLE.DESCRIPTION]    :   desc,
-            [this.EXPENSE_TABLE.DATE]           :   current_date,
-            [this.EXPENSE_TABLE.CATEGORY]       :   category
+            [UserModel.EXPENSE_TABLE.USER_ID]        :   user_id,
+            [UserModel.EXPENSE_TABLE.AMOUNT]         :   amount,
+            [UserModel.EXPENSE_TABLE.DESCRIPTION]    :   desc,
+            [UserModel.EXPENSE_TABLE.DATE]           :   current_date,
+            [UserModel.EXPENSE_TABLE.CATEGORY]       :   category
         }
         
         if(exists){
-            const INSERT_QUERY = `INSERT INTO ${this.EXPENSE_TABLE.NAME} SET ?`
+            const INSERT_QUERY = `INSERT INTO ${UserModel.EXPENSE_TABLE.NAME} SET ?`
             const SQL_INSERT_QUERY = mysql.format(INSERT_QUERY, [data_to_insert]);
             
             const [result, _] = await rawQuery(SQL_INSERT_QUERY);
@@ -173,8 +174,8 @@ class UserModel {
 
     //Returns a mysql result object (IN JSON FORMAT), after deleting a row from the expenses table
     static async removeExpense(expense_id){
-        console.log(`Attempting to delete ${expense_id} from ${this.EXPENSE_TABLE.NAME}`);
-        const DELETE_QUERY = `DELETE FROM ${this.EXPENSE_TABLE.NAME} WHERE ${this.EXPENSE_TABLE.EXPENSE_ID}=?`;
+        console.log(`Attempting to delete ${expense_id} from ${UserModel.EXPENSE_TABLE.NAME}`);
+        const DELETE_QUERY = `DELETE FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.EXPENSE_ID}=?`;
         const SQL_DELETE_QUERY = mysql.format(DELETE_QUERY, [expense_id]);
 
         const [result, _] = await rawQuery(SQL_DELETE_QUERY);
@@ -184,6 +185,24 @@ class UserModel {
         }else{
             console.log(`Expense ID : ${expense_id} didnt exist`);
             return result;
+        }
+    }
+
+    //Updates the budget of a given user_id if it exists in the database
+    static async updateBudget(user_id, newBudget){
+        console.log(`Attempting to update budget of user : ${user_id}`);
+        
+        const UPDATE_QUERY = `UPDATE ${UserModel.USER_TABLE.NAME} SET ${UserModel.USER_TABLE.BUDGET} = ? WHERE ${UserModel.USER_TABLE.USER_ID} = ?`;
+        const SQL_UPDATE_QUERY = mysql.format(UPDATE_QUERY, [newBudget, user_id]);
+        const exists = await Exists(UserModel.USER_TABLE.NAME, UserModel.USER_TABLE.USER_ID, user_id);
+        
+        if(exists){
+            const [result, _] = await rawQuery(SQL_UPDATE_QUERY);
+            console.log("Updated value")
+            return result;
+        }else{
+            console.log("No such user exists");
+            return "error"
         }
     }
 }

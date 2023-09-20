@@ -3,7 +3,8 @@ const express = require('express');
 const router = express.Router();
 
 
-const { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense } = require('../controllers/user')
+const { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense, updateCurrentBudget } = require('../controllers/user');
+
 
 
 
@@ -22,6 +23,9 @@ router.route("/add/expense")
 
 router.route("/remove/expense")
     .post(deleteExpense);
+
+router.route("/update/budget")
+    .post(updateCurrentBudget)
 
 
 module.exports = router;

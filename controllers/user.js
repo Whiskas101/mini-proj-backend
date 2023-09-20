@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
     const result = await UserModel.addUser(Username, Password);
 
     //Says internal server error if user already exists, says OK if user is new, can change whenever if need arises
-    res.sendStatus(result);
+    res.send(result);
 }
 
 const loginUser = async (req, res) => {
@@ -62,8 +62,17 @@ const deleteExpense = async(req, res) => {
     res.send(result);
 }
 
+const updateCurrentBudget = async(req, res) => {
+    
+    const user_id = req.body.userid;
+    const newBudget = req.body.budget;
+    const result = await UserModel.updateBudget(user_id, newBudget);
+    
+    res.send(result);
+}
 
-module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense };
+
+module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense, updateCurrentBudget };
 
 
 
