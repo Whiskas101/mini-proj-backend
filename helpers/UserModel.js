@@ -72,7 +72,7 @@ class UserModel {
         //only proceed if there are expenses for UserModel user
         if (result != false) {
             const RECENT_EXPENSES_QUERY =
-                `SELECT * FROM ${UserModel.EXPENSE_TABLE.NAME} where ${UserModel.EXPENSE_TABLE.USER_ID}= ? and ${UserModel.EXPENSE_TABLE.DATE} >= ?`;
+                `SELECT * FROM ${UserModel.EXPENSE_TABLE.NAME} where ${UserModel.EXPENSE_TABLE.USER_ID}= ? and ${UserModel.EXPENSE_TABLE.DATE} >= ? ORDER BY ${UserModel.EXPENSE_TABLE.DATE} DESC`;
             const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago])
             const [output, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
 
