@@ -8,7 +8,7 @@ const DB_NAME = "user_data";
 const HOST = "localhost";
 const USER = "root";
 const PASSWORD = "root";
-const CONNECTION_LIMIT = 15;
+const CONNECTION_LIMIT = 5;
 
 // set up max connections to be 15, just a random number. 
 const pool = mysql.createPool({
