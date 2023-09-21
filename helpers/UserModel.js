@@ -97,11 +97,58 @@ class UserModel {
 
         // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
         const RECENT_EXPENSES_QUERY =
-                `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${UserModel.EXPENSE_TABLE.DATE}) AS date FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${UserModel.EXPENSE_TABLE.DATE})`;
+                `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${UserModel.EXPENSE_TABLE.DATE}) AS date FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? GROUP BY DATE(${UserModel.EXPENSE_TABLE.DATE}) ORDER BY DATE(${UserModel.EXPENSE_TABLE.DATE})`;
         const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
 
         if(exists){
             const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
+            return result;
+        }else{
+            return `User ID = ${user_id} doesn't exist`;
+        }
+    }
+
+    static async getExpensesByDayGroupedByCategory(range, user_id){
+        console.log(`Attempting to get past ${range} days, grouped by each day`);
+        const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
+        
+        const month_ago = new Date();
+        month_ago.setDate(month_ago.getDate() - range);
+        const date_month_ago = month_ago.toISOString().slice(0, 19).replace("T", " ");
+
+        // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
+        const RECENT_EXPENSES_QUERY =
+                `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount, DATE(${UserModel.EXPENSE_TABLE.DATE}) AS date, ${UserModel.EXPENSE_TABLE.CATEGORY} AS category FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? GROUP BY ${UserModel.EXPENSE_TABLE.CATEGORY}, DATE(${UserModel.EXPENSE_TABLE.DATE})  ORDER BY DATE(${UserModel.EXPENSE_TABLE.DATE})`;
+        const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
+
+        if(exists){
+            const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
+            console.log(result);
+            return result;
+        }else{
+            return `User ID = ${user_id} doesn't exist`;
+        }
+    }
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //TO BE IMPLEMENTED!!! THIS FUNCTION HAS NOT BEEN ROUTED YET > TAKE CARE > TO DO SO BEFORE USING IT
+    static async getTotalExpensesInRange(user_id, range){
+        console.log(`Attempting to get sum of expenses of past ${range} days`);
+        const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
+
+        const month_ago = new Date();
+        month_ago.setDate(month_ago.getDate() - range);
+        const date_month_ago = month_ago.toISOString().slice(0, 19).replace("T", " ");
+
+        // We are converting DATETIME to DATE here, for sake of simplicity when representing data over a graph
+        const RECENT_EXPENSES_QUERY =
+                `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? `;
+        const SQL_RECENT_EXPENSES_QUERY = mysql.format(RECENT_EXPENSES_QUERY, [user_id, date_month_ago]);
+
+        if(exists){
+            const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
+            console.log(result);
             return result;
         }else{
             return `User ID = ${user_id} doesn't exist`;
