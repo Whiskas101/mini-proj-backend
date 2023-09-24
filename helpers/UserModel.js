@@ -108,6 +108,7 @@ class UserModel {
         }
     }
 
+    //Groups part X days of expenses by BOTH date and category
     static async getExpensesByDayGroupedByCategory(range, user_id){
         console.log(`Attempting to get past ${range} days, grouped by each day`);
         const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
@@ -130,9 +131,7 @@ class UserModel {
         }
     }
 
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TO BE IMPLEMENTED!!! THIS FUNCTION HAS NOT BEEN ROUTED YET > TAKE CARE > TO DO SO BEFORE USING IT
+    //Returns total amount of expenses in a particular range of past X days
     static async getTotalExpensesInRange(user_id, range){
         console.log(`Attempting to get sum of expenses of past ${range} days`);
         const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
@@ -148,6 +147,26 @@ class UserModel {
 
         if(exists){
             const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_QUERY);
+            console.log(result);
+            return result;
+        }else{
+            return `User ID = ${user_id} doesn't exist`;
+        }
+    }
+
+    static async getTotalExpensesByCategory(user_id, range){
+        console.log(`Attempting to get sum of expenses of past ${range} days by category`);
+        const exists = await Exists(UserModel.EXPENSE_TABLE.NAME, UserModel.EXPENSE_TABLE.USER_ID, user_id);
+
+        const month_ago = new Date();
+        month_ago.setDate(month_ago.getDate() - range);
+        const date_month_ago = month_ago.toISOString().slice(0, 19).replace("T", " ");
+
+        const RECENT_EXPENSES_CATEGORIZED = `SELECT SUM(${UserModel.EXPENSE_TABLE.AMOUNT}) AS amount, ${UserModel.EXPENSE_TABLE.CATEGORY} FROM ${UserModel.EXPENSE_TABLE.NAME} WHERE ${UserModel.EXPENSE_TABLE.USER_ID}= ? AND ${UserModel.EXPENSE_TABLE.DATE} >= ? GROUP BY ${UserModel.EXPENSE_TABLE.CATEGORY}`;
+        const SQL_RECENT_EXPENSES_CATEGORIZED = mysql.format(RECENT_EXPENSES_CATEGORIZED, [user_id, date_month_ago]);
+        
+        if(exists){
+            const [result, _] = await rawQuery(SQL_RECENT_EXPENSES_CATEGORIZED);
             console.log(result);
             return result;
         }else{
@@ -252,6 +271,8 @@ class UserModel {
             return "error"
         }
     }
+
+
 }
 
 module.exports = UserModel;

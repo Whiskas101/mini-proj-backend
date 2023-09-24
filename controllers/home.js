@@ -48,4 +48,25 @@ const getRecentExpensesGrouped = async (req, res) => {
     res.send(result);
 }
 
-module.exports = { homePage, getExpenses, getRecentExpenses, getRecentExpensesByDay, getRecentExpensesGrouped };
+const getSumOfExpenseRange = async (req, res) => {
+    const range = req.body.range;
+    const userid = req.body.userid;
+
+    const result = await UserModel.getTotalExpensesInRange(userid, range);
+
+    res.send(result);
+
+}
+
+const getCategorizedExpensesByRange = async (req, res) => {
+
+    const range = req.body.range;
+    const userid = req.body.userid;
+
+    const result = await UserModel.getTotalExpensesByCategory(userid, range);
+
+    res.send(result);
+
+}
+
+module.exports = { homePage, getExpenses, getRecentExpenses, getRecentExpensesByDay, getRecentExpensesGrouped, getSumOfExpenseRange, getCategorizedExpensesByRange};
