@@ -12,7 +12,7 @@ class UserModel {
         USER_ID: 'user_id',
         EXPENSE_ID: 'expense_id',
         AMOUNT: 'amount',
-        DESCRIPTION: 'desc',
+        DESCRIPTION: 'description',
         CATEGORY: 'category',
         DATE: 'date'
     };
@@ -272,7 +272,28 @@ class UserModel {
         }
     }
 
+    //Fetches the top 10 most common expenses. (Their category, amount and desc)
+    static async fetchCommonExpenses(user_id, range){
+        console.log(`Attempting to fetch the top ${range} most common expenses for user id = ${user_id} `);
 
+        const FETCH_QUERY = `SELECT ${UserModel.EXPENSE_TABLE.CATEGORY}, ${UserModel.EXPENSE_TABLE.AMOUNT}, ${UserModel.EXPENSE_TABLE.DESCRIPTION}, COUNT(*) AS frequency
+        FROM ${UserModel.EXPENSE_TABLE.NAME}
+        WHERE user_id = ?
+        GROUP BY ${UserModel.EXPENSE_TABLE.CATEGORY}, ${UserModel.EXPENSE_TABLE.AMOUNT}, ${UserModel.EXPENSE_TABLE.DESCRIPTION}
+        ORDER BY frequency DESC
+        LIMIT ${range};`;
+        const SQL_FETCH_QUERY = mysql.format(FETCH_QUERY, [user_id]);
+        const exists = await Exists(UserModel.USER_TABLE.NAME, UserModel.USER_TABLE.USER_ID, user_id);
+
+        if(exists){
+            const [result, _] = await rawQuery(SQL_FETCH_QUERY);
+            console.log(result);
+            return result;
+        }else{
+            console.log("User not found");
+            return "No such user";
+        }
+    }
 }
 
 module.exports = UserModel;

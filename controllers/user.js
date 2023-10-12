@@ -24,11 +24,11 @@ const loginUser = async (req, res) => {
     const user = await UserModel.attemptLogin(Username, Password);
 
     if (user == -1) {
-        res.send({user: "-1"});
-        
+        res.send({ user: "-1" });
+
     } else {
-        res.send({user: user});
-        
+        res.send({ user: user });
+
     }
 
 }
@@ -38,14 +38,14 @@ const showAllUsers = async (req, res) => {
     res.send(data);
 }
 
-const deleteUser = async(req, res) =>{
+const deleteUser = async (req, res) => {
     const userid = req.body.userid;
-    
+
     const result = await UserModel.removeUser(userid);
     res.send(result);
 }
 
-const addExpense = async(req, res) =>{
+const addExpense = async (req, res) => {
     const userid = req.body.userid;
     const desc = req.body.desc;
     const amount = req.body.amount;
@@ -55,24 +55,33 @@ const addExpense = async(req, res) =>{
     res.send(result);
 }
 
-const deleteExpense = async(req, res) => {
+const deleteExpense = async (req, res) => {
     const expense_id = req.body.expenseid;
 
     const result = await UserModel.removeExpense(expense_id);
     res.send(result);
 }
 
-const updateCurrentBudget = async(req, res) => {
-    
+const updateCurrentBudget = async (req, res) => {
+
     const user_id = req.body.userid;
     const newBudget = req.body.budget;
     const result = await UserModel.updateBudget(user_id, newBudget);
-    
+
+    res.send(result);
+}
+
+const getCommonExpenses = async (req, res) => {
+    const user_id = req.body.userid;
+    const range = req.body.range;
+
+    const result = await UserModel.fetchCommonExpenses(user_id, range);
+
     res.send(result);
 }
 
 
-module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense, updateCurrentBudget };
+module.exports = { registerUser, loginUser, showAllUsers, deleteUser, addExpense, deleteExpense, updateCurrentBudget, getCommonExpenses };
 
 
 
