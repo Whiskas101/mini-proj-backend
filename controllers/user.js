@@ -1,7 +1,7 @@
 
 const UserModel = require('../helpers/UserModel.js');
 
-// THESE FUNCTIONS CURRENTLY SEND THE RESULT AS A RESPONSE.
+// THESE FUNCTIONS SEND THE RESULT AS A RESPONSE.
 // MODIFY ACCORDING TO YOUR NEEDS
 const registerUser = async (req, res) => {
 
